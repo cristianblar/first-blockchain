@@ -4,10 +4,10 @@ import datetime
 
 class Block:
 
-    def __init__(self, timestamp, data, previous_hash):
-        self.timestamp = timestamp
+    def __init__(self, data):
+        self.timestamp = self.set_timestamp()
         self.data = data
-        self.previous_hash = previous_hash
+        self.previous_hash = None
         self.hash = self.calc_hash()
         self.previous = None
 
@@ -16,6 +16,13 @@ class Block:
         hash_str = str(self.data) + self.timestamp + str(self.previous_hash)
         sha.update(hash_str.encode('utf-8'))
         return sha.hexdigest()
+
+    def set_timestamp(self):
+        timestamp = str(datetime.datetime.utcnow())
+        return timestamp
+
+    def set_previous_hash(self, previous_hash):
+        self.previous_hash = previous_hash
 
     def set_previous_block(self, block):
         self.previous = block
@@ -45,11 +52,12 @@ class BlockChain:
 
     def append_block(self, data):
         if self.get_tail() is None:
-            new_block = Block(str(datetime.datetime.utcnow()), data, 0)
+            new_block = Block(data)
+            new_block.set_previous_hash(0)
             self.set_tail(new_block)
         else:
-            new_block = Block(str(datetime.datetime.utcnow()), data,
-                              self.get_tail().get_hash())
+            new_block = Block(data)
+            new_block.set_previous_hash(self.get_tail().get_hash())
             new_block.set_previous_block(self.get_tail())
             self.set_tail(new_block)
 
